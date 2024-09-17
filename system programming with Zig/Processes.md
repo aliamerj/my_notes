@@ -1,0 +1,98 @@
+# Processes 
+allow multiple programs to run concurrently in modern operating systems, managed by the OS to ensure reliability. 
+
+A process is an instance of a program in execution. 
+- It is an abstraction used by the operating system to manage resources, including memory, CPU, and I/O, for the running program.
+- Every process has its own address space (isolated memory) to ensure one process does not interfere with another.
+
+## Process States:
+- New: The process is being created.
+- Running: Instructions are being executed on the CPU.
+- Waiting (Blocked): The process is waiting for some event (like I/O completion).
+- Ready: The process is ready to run but waiting for CPU availability.
+- Terminated: The process has finished execution.
+
+A process is a program in execution, which includes:
+1. The program’s instructions and data.
+2. The current state of the program.
+3. Resources needed for execution.
+
+## Process Control Block (PCB)
+The OS manages processes using a Process Control Block (PCB), which stores essential information about a process. 
+
+Some common fields include:
+- Identifier: Unique ID for the process.
+- State: Current state (running, waiting, etc.).
+- Priority: The process's importance.
+- Program Counter: Address of the next instruction.
+- Register Data: CPU register values.
+- Memory Pointers: Pointers to code/data.
+- I/O Status: Info on files and devices.
+- Accounting: Resource usage information.
+#### When a process is suspended or interrupted, the OS saves the program counter and register data into the PCB to resume the process later.
+
+## Process Creation and Termination:
+1. **Creation**: In UNIX-like systems, new processes are created using the `fork()` system call. `fork()` creates a new process, called the child process, that is a copy of the parent process. The `exec()` system call can replace the child’s memory space with a new program.
+Termination: A process terminates using the exit() system call. Upon termination, it releases resources (CPU, memory) and updates its state to Terminated.
+## Process Lifecycle
+Processes are created, executed, and eventually terminated. They can be created in three ways:
+
+1. System Boot: OS starts system processes.
+2. User Request: User starts a new process (e.g., running a program).
+3. Process Spawning: A parent process creates a child process.
+4. Processes can end in four ways:
+   1. Normal Exit: Process finishes normally.
+   2. Error Exit: Process voluntarily exits due to an error.
+   3. Fatal Error: OS forces the process to terminate due to an error.
+   4. Killed by Another Process: A process is killed by another (e.g., via the kill command).
+
+#### Processes can become zombies (finished but waiting to be reaped) or orphans (if their parent dies before them).
+
+## Five-State Process Model
+Processes move between five possible states:
+
+1. New: Process is created but not yet ready to run.
+2. Ready: Ready to execute, but waiting for CPU time.
+3. Running: Actively executing.
+4. Blocked: Waiting for a resource (I/O, user input, etc.).
+5. Terminated: Finished execution, but not yet cleaned up.
+  
+## Transitions between states include:
+     1. Create: Process is created.
+     2. Admit: New process becomes ready.
+     3. Dispatch: Ready process starts running.
+     4. Suspend: Running process is paused.
+     5. Exit: Process finishes execution.
+     6. Block: Running process waits for a resource.
+     7. Unblock: Blocked process becomes ready.
+     8. Reap: Terminated process is cleaned up.
+   
+## Fork Example to Zig
+In Zig, you can use the `std.os.fork()` function to perform similar process forking.
+
+```zig
+const std = @import("std");
+
+pub fn main() void {
+    const pid = std.os.fork();
+    if (pid == 0) {
+        std.debug.print("I am the child process.\n", .{});
+    } else {
+        std.debug.print("I am the parent process.\n", .{});
+    }
+}
+```
+## Process Scheduling:
+The scheduler determines which process gets to run on the CPU. Key concepts:
+1. Preemptive Scheduling: Processes can be interrupted and moved from the running state to allow another process to run (used in most modern OSes).
+2. Non-preemptive Scheduling: A process continues running until it voluntarily gives up the CPU (like during I/O waits).
+3. Context Switch: When switching from one process to another, the OS performs a context switch, saving the state of the old process and loading the state of the new process.
+
+## Process vs Thread:
+A process is a heavy-weight unit with its own memory space, while a thread is a lighter-weight unit within a process that shares the same memory space. Threads within the same process can share data more easily but must handle synchronization challenges.
+
+## Additional Information on Process Management
+1. Context Switching: The OS switches between processes by saving the current state of a process in its PCB and loading the state of the next process.
+2. Scheduling: The OS scheduler decides which process to run, based on priorities and resource availability.
+3. Multitasking: OS manages multiple processes by switching between them rapidly to give the appearance that they are running concurrently.
+
